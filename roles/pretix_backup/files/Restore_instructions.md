@@ -5,7 +5,7 @@ Comme indiqué dans la [documentation officielle](https://docs.pretix.eu/self-ho
 - d'une copie du dossier `/var/pretix-data`.
 
 La procédure ci-après présuppose :
-- qu'une instance Pretix vierge a été installée à l'aide de ce playbook sur une machine accessible à l'adresse pretix.example.com (utilisé pour le chemin de stockage de la sauvegarde sur le serveur de sauvegarde),
+- qu'une instance Pretix vierge a été installée à l'aide de ce [playbook](https://github.com/F2b59/Pretix-Ansible-Playbook) sur une machine accessible à l'adresse pretix.example.com (utilisé pour le chemin de stockage de la sauvegarde sur le serveur de sauvegarde),
 - que le serveur de sauvegarde est accessible à l'adresse backup.pretix.example.com,
 - que la clé SSH de l'utilisateur `root` sur l'instance Pretix a été ajoutée dans le fichier `authorized_keys` de l'utilisateur `backup` sur le serveur de sauvegardes.
 
