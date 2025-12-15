@@ -1,0 +1,2 @@
+0  3  *  *  0    root  bash /home/backup/pretix-backup-weekly.sh
+0  3  *  *  1-6  root  bash /home/backup/pretix-backup-daily.sh

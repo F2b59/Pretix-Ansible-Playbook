@@ -1,0 +1,21 @@
+- name: Allow incoming HTTP (certbot)
+  iptables:
+    action: append  # may be needed to use insert instead
+    chain: "{{ item }}"
+    protocol: tcp
+    destination_port: 80
+    ctstate: NEW,ESTABLISHED
+    syn: match
+    jump: ACCEPT
+  loop: [INPUT,OUTPUT]
+
+- name: Allow incoming HTTPS (nginx)
+  iptables:
+    action: append  # may be needed to use insert instead
+    chain: "{{ item }}"
+    protocol: tcp
+    destination_port: 443
+    ctstate: NEW,ESTABLISHED
+    syn: match
+    jump: ACCEPT
+  loop: [INPUT,OUTPUT]

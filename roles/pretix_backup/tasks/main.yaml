@@ -1,0 +1,30 @@
+- name: Create backup directories
+  file:
+    path: "/home/backup/{{ item }}"
+    state: directory
+    owner: backup
+    group: backup
+    mode: 0770
+  loop: [pretix,postgresql]
+
+- name: Copy backup scipts
+  template:
+    src: "{{ item }}"
+    dest: "/home/backup/{{ item }}"
+    owner: backup
+    group: backup
+    mode: 0750
+  loop: [pretix-backup-daily.sh,pretix-backup-weekly.sh,pretix-backup-oneshot.sh]
+
+- name: Copy restore instructions
+  copy:
+    src: Restore_instructions.md
+    dest: /home/backup/Restore_instructions.md
+    owner: backup
+    group: backup
+    mode: 0640
+
+- name: Copy Pretix-backup crontab
+  template:
+    src: pretix-backup-cron
+    dest: /etc/cron.d/pretix-backup

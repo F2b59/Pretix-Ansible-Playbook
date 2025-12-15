@@ -1,0 +1,36 @@
+---
+  - name: Init, setup, iptables, backup preparation
+    hosts: all
+    gather_facts: yes
+    become: yes
+    roles:
+      - init
+      # - iptables  # enable only on Oracle Cloud, not on PVE
+      - backup
+    tags: always
+
+  - name: Pretix + DBs
+    hosts: all
+    become: yes
+    roles:
+      - postgresql
+      - redis
+      - pretix  # (Includes Docker install)
+      - pretix_backup
+    tags: pre
+
+  - name: Monitoring (Prometheus, Grafana) - Optional
+    hosts: all
+    become: yes
+    roles:
+      - prometheus
+      - grafana
+    tags: mon
+
+  - name: Proxy web server
+    hosts: all
+    become: yes
+    roles:
+      - geerlingguy.certbot
+      - nginx
+    tags: www

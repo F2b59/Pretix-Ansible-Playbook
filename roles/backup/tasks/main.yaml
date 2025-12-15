@@ -1,0 +1,43 @@
+- name: Create backup group
+  group:
+    name: backup
+
+- name: Create backup user  # backups are actually performed as root, but this home dir is used
+  user:
+    name: backup
+    group: backup
+    home: /home/backup
+    move_home: yes
+
+- name: Generate SSH key for root  # since it's root who needs to connect to the backup server
+  community.crypto.openssh_keypair:
+    path: /root/.ssh/id_rsa
+    size: 4096
+    owner: root
+    group: root
+
+- name: Make sure /home/backup is owned by user backup
+  file:
+    path: /home/backup
+    state: directory
+    owner: backup
+    group: backup
+
+- name: Add backup server key to known_hosts
+  known_hosts:
+    name: "{{ backup_server_address }}"
+    key: "{{ lookup('pipe', 'ssh-keyscan '+backup_server_address) }}"
+    hash_host: true
+  #become_user: backup # (non, car backup scripts are run as root)
+
+- name: Create restore directory
+  file:
+    path: /home/backup/restore
+    state: directory
+    owner: backup
+    group: backup
+    mode: 0770
+
+- name: Install Duplicity
+  apt:
+    name: duplicity

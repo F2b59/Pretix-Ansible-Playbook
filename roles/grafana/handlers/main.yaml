@@ -1,0 +1,8 @@
+- name: Update APT cache
+  apt:
+    update_cache: yes
+
+- name: Restart Grafana
+  service:
+    name: grafana-server
+    state: restarted

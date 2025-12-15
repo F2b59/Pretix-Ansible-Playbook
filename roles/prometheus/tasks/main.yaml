@@ -1,0 +1,77 @@
+- name: Install Prometheus + exporters
+  apt:
+    name:
+      - prometheus
+      - prometheus-nginx-exporter
+      - prometheus-node-exporter
+      - prometheus-postgres-exporter
+      - prometheus-redis-exporter
+
+- name: Copy PostgreSQL exporter config
+  copy:
+    src: prometheus-postgres-exporter
+    dest: /etc/default/prometheus-postgres-exporter
+  notify: Restart Postgres exporter
+
+- name: Start and enable service
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - prometheus
+    - prometheus-nginx-exporter
+    - prometheus-node-exporter
+    - prometheus-postgres-exporter
+    - prometheus-redis-exporter
+
+- name: Copy Prometheus configuration
+  template:
+    src: prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+  no_log: true
+  notify: Restart Prometheus
+
+- name: Add web path argument
+  template:
+    src: etc_default_prometheus.j2
+    dest: /etc/default/prometheus
+  notify: Restart Prometheus
+
+- name: Create node exporter service dir  # for Prometheus to access services status (equivalent to systemctl edit prometheus-node-exporter.service)
+  file:
+    path: /etc/systemd/system/prometheus-node-exporter.service.d/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Modify node exporter service file
+  copy:
+    src: prometheus-node-exporter.service
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload systemd daemon
+    - Restart node exporter
+
+- name: Create postgres exporter service dir  # so that the exporter can log into postgres (equivalent to systemctl edit prometheus-postgres-exporter.service)
+  file:
+    path: /etc/systemd/system/prometheus-postgres-exporter.service.d/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Modify postgres exporter service file
+  copy:
+    src: prometheus-postgres-exporter.service
+    dest: /etc/systemd/system/prometheus-postgres-exporter.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: 
+    - Reload systemd daemon
+    - Restart Postgres exporter

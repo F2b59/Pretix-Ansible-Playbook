@@ -1,0 +1,9 @@
+---
+  - name: Debug
+    hosts: all
+    gather_facts: yes
+    become: yes
+    tasks:
+      - debug:
+          msg: "{{ metrics_password }}"
+

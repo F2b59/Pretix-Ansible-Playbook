@@ -1,0 +1,25 @@
+- name: Update APT cache
+  apt:
+    cache_valid_time: 86400
+
+- name: Update CA certificates
+  apt:
+    name: ca-certificates>=20211000*
+
+- name: Setup
+  setup:
+
+- name: Install basic tools (can be put elsewhere later on)
+  apt:
+    name:
+      - acl  # for setting become_user to an unprivileged user
+      - cron
+      # - curl  # The following packages are optional
+      # - htop
+      # - nmon
+
+- name: Add SSH authorized keys
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ item }}"
+  loop: "{{ authorized_keys }}"

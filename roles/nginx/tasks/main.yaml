@@ -1,0 +1,42 @@
+- name: Install Nginx
+  apt:
+    name: nginx
+
+- name: Copy Nginx proxy.conf
+  copy:
+    src: proxy.conf
+    dest: /etc/nginx/proxy.conf
+
+- name: Copy Nginx ssl.conf
+  template:
+    src: ssl.conf.j2
+    dest: /etc/nginx/ssl.conf
+
+- name: Copy Nginx connection_upgrade config block
+  copy:
+    src: nginx_connection_upgrade.conf
+    dest: /etc/nginx/conf.d/nginx_connection_upgrade.conf
+
+- name: Download dhparams from mozilla.org (as referenced in ssl.conf)
+  get_url:
+    url: "https://ssl-config.mozilla.org/ffdhe2048.txt"
+    dest: /etc/nginx/dhparams.pem
+
+- name: List installed packages in ansible_facts  # Used for Nginx config
+  package_facts:
+    manager: auto
+
+- name: Copy Nginx config file
+  template:
+    src: default.j2
+    dest: /etc/nginx/sites-enabled/default
+  notify: Restart nginx
+
+# - name: Flush handlers  # Avoid nginx_exporter being restarted on second run
+#   meta: flush_handlers
+
+- name: Start and enable service
+  service:
+    name: nginx
+    state: started
+    enabled: yes

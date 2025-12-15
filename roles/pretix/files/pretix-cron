@@ -1,0 +1,1 @@
+*/15 * * * *	docker	/usr/bin/docker exec pretix.service pretix cron

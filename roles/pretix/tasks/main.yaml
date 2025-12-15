@@ -1,0 +1,95 @@
+- name: Install Docker
+  apt:
+    name:
+      - docker.io
+      - python3-pymysql  # needed if using community.mysql module
+      - docker-buildx  # to build images
+
+- name: Start and enable service
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Create Docker user
+  user:
+    name: docker
+    password: '!'  # locked/disabled password auth
+    group: docker
+    shell: /sbin/nologin
+  register: docker_user  # used for UID and GID
+
+# - name: Set up Docker networks
+#   community.docker.docker_network:
+#     name: pretix-net
+#     driver: bridge
+#     scope: local
+
+- name: Create Pretix data directory
+  file:
+    path: /var/pretix-data/
+    state: directory
+    owner: 15371
+    group: 15371
+
+- name: Create Pretix config directory
+  file:
+    path: /etc/pretix/
+    state: directory
+    owner: 15371
+    group: 15371
+
+- name: Copy Pretix config
+  template:
+    src: pretix.cfg.j2
+    dest: /etc/pretix/pretix.cfg
+    owner: 15371
+    group: 15371
+    mode: 0700
+  notify: Restart Pretix
+  no_log: true
+
+- name: Create pretix-sbp image directory
+  file:
+    path: /home/docker/pretix-sbp/
+    state: directory
+    owner: docker
+    group: docker
+
+- name: Copy Dockerfile (plugins require to build a new image)
+  copy:
+    src: Dockerfile-pretix-sbp
+    dest: /home/docker/pretix-sbp/Dockerfile
+    owner: docker
+    group: docker
+
+- name: Build pretix-sbp image
+  community.docker.docker_image_build:
+    name: pretix-sbp
+    path: /home/docker/pretix-sbp/
+    pull: "{{ rebuild_pretix_sbp_image }}"
+    rebuild: "{{ 'always' if rebuild_pretix_sbp_image else 'never' }}"
+  notify:
+    - Restart Pretix
+
+- name: Copy systemd service file (with Docker command)
+  copy:
+    src: pretix.service
+    dest: /etc/systemd/system/pretix.service
+  notify:
+    - Restart Pretix
+    - Reload systemd daemon
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Start and enable service
+  service:
+    name: pretix
+    state: started
+    enabled: true
+
+- name: Runperiodic cron job
+  copy:
+    src: pretix-cron
+    dest: /etc/cron.d/pretix

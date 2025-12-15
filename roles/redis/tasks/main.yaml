@@ -1,0 +1,34 @@
+- name: Install Redis
+  apt:
+    name: redis-server
+
+- name: Start and enable service
+  service:
+    name: redis-server
+    state: started
+    enabled: true
+
+- name: Add unix socket to config
+  copy:
+    src: redis.conf
+    dest: /etc/redis/redis.conf
+  notify: Restart Redis
+
+# Cf. https://unix.stackexchange.com/a/676593
+- name: Make the Redis config persistent (equivalent to systemctl edit redis.service) - Create service dir
+  file:
+    path: /etc/systemd/system/redis-server.service.d/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Make the Redis config persistent - Copy redis-server.service drop-in
+  copy:
+    src: redis-server.service
+    dest: /etc/systemd/system/redis-server.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Reload systemd daemon
+

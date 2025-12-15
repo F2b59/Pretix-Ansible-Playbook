@@ -1,0 +1,10 @@
+Examples des étapes pour SBP :
+mkdir /home/docker/pretix-sbp (owner = docker)
+copy Dockerfile /home/docker/pretix-sbp/Dockerfile (owner = docker)
+docker build . -t pretix-sbp
++ mettre à jour pretix.service
+systemctl daemon-reload
+systemctl restart pretix ?
+
+Doc officielle :
+https://docs.pretix.eu/en/latest/admin/installation/docker_smallscale.html#install-a-plugin

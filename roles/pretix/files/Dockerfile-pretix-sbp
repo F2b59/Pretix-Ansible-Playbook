@@ -1,0 +1,7 @@
+FROM pretix/standalone:stable
+USER root
+RUN pip3 install -i https://test.pypi.org/simple/ pretix-sbp
+# RUN pip3 install prtx-faq
+# RUN pip3 install pretix-pages
+USER pretixuser
+RUN cd /pretix/src && make production

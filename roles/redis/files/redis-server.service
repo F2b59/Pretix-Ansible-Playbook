@@ -1,0 +1,4 @@
+[Service]
+# Keep the directory around so that pretix.service in docker does not need to be
+# restarted when redis is restarted.
+RuntimeDirectoryPreserve=yes

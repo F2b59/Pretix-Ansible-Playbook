@@ -1,0 +1,8 @@
+- name: Reload systemd daemon
+  systemd_service:
+    daemon_reload: true
+
+- name: Restart Pretix
+  service:
+    name: pretix
+    state: restarted

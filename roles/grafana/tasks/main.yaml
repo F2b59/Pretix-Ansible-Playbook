@@ -1,0 +1,58 @@
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+
+- name: Add APT repository
+  deb822_repository:
+    name: grafana
+    types: deb
+    uris: https://packages.grafana.com/oss/deb
+    suites: stable
+    components:
+      - main
+    signed_by: https://packages.grafana.com/gpg.key
+  notify: Update APT cache
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Install Grafana
+  apt:
+    name: grafana
+
+- name: Copy Grafana config
+  template:
+    src: grafana.ini
+    dest: /etc/grafana/grafana.ini
+  notify: Restart Grafana
+  no_log: yes
+
+- name: Provision Data sources
+  template:
+    src: provisioning_prometheus.yaml
+    dest: /etc/grafana/provisioning/datasources/prometheus.yaml
+  notify: Restart Grafana
+
+- name: Create directory for dashboard provisioning
+  file:
+    path: /var/lib/grafana/dashboards
+    state: directory
+
+- name: Copy dashboard provisioning config
+  copy:
+    src: ansible_dashboards.yaml
+    dest: /etc/grafana/provisioning/dashboards/ansible_dashboards.yaml
+  notify: Restart Grafana
+
+- name: Copy dashboard json
+  copy:
+    src: main.json
+    dest: /var/lib/grafana/dashboards/main.json
+
+- name: Start and enable service
+  systemd:  # using systemd instead of service because grafana docs mention daemon-reload; I didn't check whether this was really necessary
+    daemon_reload: yes
+    name: grafana-server
+    state: started
+    enabled: yes

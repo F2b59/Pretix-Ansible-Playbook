@@ -1,0 +1,75 @@
+# Authorized SSH keys (be careful: they will have full sudo privileges)
+
+authorized_keys: []
+  #- "ssh-rsa AAAA= user@host"
+# This playbook does *not* take care of SSH hardening
+
+
+# PostgreSQL
+
+postgresql_version: 17  # for Debian 13 ; otherwise just look it up on pkgs.org
+
+postgres_pretix_password: "INSERT_RANDOM_DB_PASSWORD"  # password for user 'pretix' in PostgreSQL ; change it and use Ansible-vault
+
+
+# Pretix
+
+pretix_port: 8345
+pretix_instance_name: Pretix
+pretix_locale: fr
+pretix_timezone: Europe/Paris
+pretix_currency: EUR
+pretix_admin_alert_email: admin@example.com  # addresses receiving a report about every error 500 thrown by Pretix
+
+rebuild_pretix_sbp_image: true  # rebuild the Docker image (pulls pretix/standalone + adds pretix-sbp plugin)
+
+# Pretix - e-mail settings
+
+smtp_sender_address: noreply@example.com
+smtp_server_address: example.com
+smtp_port: 2525
+smtp_ssl: "off" # "on" or "off"
+smtp_tls: "on"  # "on" or "off"
+smtp_username: SMTP_USERNAME
+smtp_password: "SMTP_PASSWORD"
+
+# Pretix - Metrics page (used by Prometheus)
+
+metrics_user: prometheus
+metrics_password: "INSERT_RANDOM_PASSWORD"
+
+
+# Nginx & Certbot
+
+domain_name: pretix.example.com  # present in nginx server block, certbot config, Pretix config, backup script
+pretix_domain_name: pretix.example.com  # "{{ domain_name }}" si le serveur est accessible directement ; domaine "apparent" s'il est derrière un proxy (used by pretix, prometheus)
+certbot_admin_email: admin-pretix-certbot@yopmail.com
+certbot_certs:
+  - domains:
+    - "{{ domain_name }}"
+
+certbot_create_extra_args: ""
+certbot_create_if_missing: true
+certbot_create_standalone_stop_services: []
+certbot_hsts: true
+
+
+# Backups
+
+# - For backups to work, the ssh key at /root/.ssh/id_rsa.pub needs to be put
+#   in the backup server's authorized_keys file
+# - The remote server is expected to have a 'backup' user, having access to
+#   /home/backup/{{ domain_name }}/postgresql as well as home/backup/{{ domain_name }}/pretix
+# - The remote server should have Rsync installed
+
+backup_server_address: backup.pretix.example.com
+keep_backups_for: 3W  # Passed directly to Duplicity (remove-older-than)
+
+
+# Monitoring
+
+prometheus_port: 9090
+allow_prometheus_only_for_localhost: true
+
+grafana_port: 3000
+grafana_password: "INSERT_RANDOM_PASSWORD"  # grafana user = admin

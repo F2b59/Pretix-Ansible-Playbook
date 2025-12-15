@@ -1,0 +1,40 @@
+- name: Install PostgreSQL
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2  # needed if using community.postgresql module
+
+- name: Start and enable service
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Postgresql config postgresql.conf
+  lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    line: "listen_addresses = '*'"
+    insertafter: EOF
+  notify: Restart PostgreSQL
+
+- name: Postgresql config pg_hba.conf
+  lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    line: "host    pretix          pretix          172.17.0.1/16           md5"
+    insertafter: EOF
+  notify: Restart PostgreSQL
+
+- name: Create PostgreSQL user for Pretix
+  community.postgresql.postgresql_user:
+    name: pretix
+    password: "{{ postgres_pretix_password }}"
+  become_user: postgres
+  no_log: true
+
+- name: Create PostgreSQL DB for Pretix
+  community.postgresql.postgresql_db:
+    name: pretix
+    owner: pretix
+    encoding: UTF-8
+  become_user: postgres
