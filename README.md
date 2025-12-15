@@ -11,9 +11,9 @@ This playbook was tested on Debian 13.
 
 Once Debian is installed, install `sudo` and add the user to the sudoers without re-asking for a password (NOPASSWD:ALL) (or edit the playbook to suit your needs).
 
-Before running the playbook, update the `hosts` file with the IP address or hostname of your server. Add `ansible_password=yourPassword` in case you're using password authentication.
+Before running the playbook, update the [`hosts`](hosts) file with the IP address or hostname of your server. Add `ansible_password=yourPassword` in case you're using password authentication.
 
-Take a look at the file `group_vars/all.yaml` that contains all the variables used in the playbook. For the playbook to run, you need to set at the very least the following variables: `domain_name`, `pretix_domain_name` and `backup_server_address`. 
+Take a look at the file [`group_vars/all.yaml`](group_vars/all.yaml) that contains all the variables used in the playbook. For the playbook to run, you need to set at the very least the following variables: `domain_name`, `pretix_domain_name` and `backup_server_address`. 
 
 You probably also want to change the email addresses, passwords and SMTP credentials. You might want to double check the `postgresql_version`. If you are unsure about the purpose of a variable, don't change it.
 
@@ -28,12 +28,14 @@ Once everything is set up, place yourself in the playbook directory and run the 
 
 To access Grafana, simply add `/grafana` to your domain name (e.g. `https://pretix.example.com/grafana`). The username is `admin` and the password comes from the variable set previously.
 
+![Grafana screenshot](pretix-grafana.png)
+
 
 ## Backups
 
 A cron job automatically runs a script that will make a full backup every week and an incremental backup every day, using Duplicity. Backups are sent to a remote server through rsync; requirements for the backup server are available in the `Backups` section of `group_vars/all.yaml`.
 
-Instructions for restoring a backup are available in `roles/pretix_backup/files/Restore_instructions.md`.
+Instructions for restoring a backup are available in [`roles/pretix_backup/files/Restore_instructions.md`](roles/pretix_backup/files/Restore_instructions.md).
 
 
 ## Versions
