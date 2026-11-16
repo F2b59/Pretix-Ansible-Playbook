@@ -7,11 +7,11 @@
   deb822_repository:
     name: grafana
     types: deb
-    uris: https://packages.grafana.com/oss/deb
+    uris: https://apt.grafana.com
     suites: stable
     components:
       - main
-    signed_by: https://packages.grafana.com/gpg.key
+    signed_by: https://apt.grafana.com/gpg.key
   notify: Update APT cache
 
 - name: Flush handlers

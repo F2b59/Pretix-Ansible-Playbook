@@ -40,4 +40,4 @@ Instructions for restoring a backup are available in [`roles/pretix_backup/files
 
 ## Versions
 
-This playbook was tested with Debian 13 and Ansible 2.18.8.
+This playbook was tested with Debian 13 and Ansible Core 2.21.6 / Ansible 14.6.0.
